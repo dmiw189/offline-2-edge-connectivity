@@ -1,1 +1,1 @@
-# offline-2-edge-connectivity
+# Offline Fully Dynamic 2-edge-connectivity
