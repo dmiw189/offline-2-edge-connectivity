@@ -19,20 +19,20 @@ void compute_connectivity(string z, ll total_vertices, vector<vector<ll>> adj, v
 		while ((infile >> query >> v1 >> v2)){
 		  switch (query){
 			case 'D':
-				cout << "Removed " << v1 << " " << v2 << endl;
+				// cout << "Removed " << v1 << " " << v2 << endl;
 				remove_edge(v1, v2, adj);
 				break;
 			
 			case 'I':
-				cout << "Added " << v1 << " " << v2 << endl;
+				// cout << "Added " << v1 << " " << v2 << endl;
 				insert_edge(v1, v2, adj);
 				break;
 			
 			case 'Q':
-				cout << "Check Biconnectivity " << v1 << " " << v2 << endl;
+				// cout << "Check Biconnectivity " << v1 << " " << v2 << endl;
 				BridgeGraph b(total_vertices, adj);
-				find_bridges(total_vertices, b.total_neighbours, b.total_bridges);	  
-				b.find_bridge_tree();
+				find_bridges_simple(total_vertices, b.total_neighbours, b.total_bridges);	  
+				find_bridge_tree_simple(total_vertices, b.total_neighbours, b.bridge_tree_map, b.total_bridges);
 				results.push_back(b.bridge_tree_map[v1] == b.bridge_tree_map[v2]);
 				break;
 		  }  
@@ -42,13 +42,13 @@ void compute_connectivity(string z, ll total_vertices, vector<vector<ll>> adj, v
 }
 int main(int argc, char *argv[]){
 
-	cout.setstate(ios_base::failbit);
+	// cout.setstate(ios_base::failbit);
 
-	if (argc != 2){
-		cout << "You need to give the id of the graph inside the graph folder" << endl;
-		return 0;
-	}
-	string z= argv[1]; 
+	
+	cout << "Give the input id" << endl;
+	
+	string z;
+	cin >> z;
    	Event ev(z);
 
 	vector<bool> results;
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
 	
 	compute_connectivity(z, total_vertices, adj, results);
 
-	cout.clear();
+	// cout.clear();
 	
 	// Create the output directory if it doesn't exist
     const string output_dir = "output_files";

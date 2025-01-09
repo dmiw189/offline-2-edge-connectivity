@@ -9,27 +9,29 @@ class Event {
 		ll total_vertices;
 		string z;
 
-		vector< tuple <char, ll, ll, ll> > total_augmented_events;
-		vector< pair <ll, ll> > static_left;
-		vector< pair <ll, ll> > static_right;
+		vector<tuple<char, ll, ll, ll>> total_augmented_events;
+		vector<pair<ll, ll>> static_left;
+		vector<pair<ll, ll>> static_right;
 
-		vector <bool> left_active_nodes;
-		vector <ll> left_active_nodes_list;
-		vector <bool> right_active_nodes;
-		vector <ll> right_active_nodes_list;
+		//TODO (9) 
+		vector<bool> left_active_nodes;
+		vector<bool> right_active_nodes;
+		
+		vector<ll> left_active_nodes_list;
+		vector<ll> right_active_nodes_list;
     
-	Event(string temp_z, ll temp_total_vertices): left_active_nodes(temp_total_vertices, false), right_active_nodes(temp_total_vertices, false){     
+	Event(const string temp_z, const ll temp_total_vertices): left_active_nodes(temp_total_vertices, false), right_active_nodes(temp_total_vertices, false){     
 		z= temp_z;
 		total_vertices= temp_total_vertices;
     }
 
-	Event(string temp_z){     
+	Event(const string temp_z){     
 		z= temp_z;
     }
 
-	void add_to_augmented_events(const vector<tuple<char, ll, ll>>& event_list) {
-		for (const auto& u : event_list) {
-			total_augmented_events.push_back(make_tuple(get<0>(u), get<1>(u), get<2>(u), -1));
+	void add_to_augmented_events(const vector<tuple<char, ll, ll>> &event_list) {
+		for (const auto [type, x, y] : event_list) {
+			total_augmented_events.push_back(make_tuple(type, x, y, -1));
 		}
 	}
 
@@ -61,50 +63,51 @@ class Event {
 	}
 	
 	void print_static_edges() {
-		cout << "-------------Static Left Edges:" << endl;
+		//cout << "-------------Static Left Edges:" << endl;
 		for (const auto& edge : static_left) {
-			cout << "(" << edge.first << ", " << edge.second << ")" << endl;
+			//cout << "(" << edge.first << ", " << edge.second << ")" << endl;
 		}
-		cout << "-----------------------" << endl;
+		//cout << "-----------------------" << endl;
 
-		cout << "-------------Static Right Edges:" << endl;
+		//cout << "-------------Static Right Edges:" << endl;
 		for (const auto& edge : static_right) {
-			cout << "(" << edge.first << ", " << edge.second << ")" << endl;
+			//cout << "(" << edge.first << ", " << edge.second << ")" << endl;
 		}
-		cout << "-----------------------" << endl;
+		//cout << "-----------------------" << endl;
 	}
 	
-	void find_static_edges(ll event_start, ll event_end) {
-		ll half_value = ceil((event_end + event_start) / 2.0);
-		for (ll i = event_start; i <= event_end; i++) {
-			auto& event = total_augmented_events[i];
-			char type = get<0>(event);
-			ll x = get<1>(event), y = get<2>(event), t = get<3>(event);
-			if (i >= half_value && type == 'D'&& (t == -1 || t < event_start)) {
-					static_left.emplace_back(x, y);
-			} else if (i < half_value && type == 'I' && (t == -1 || t > event_end)) {
-					static_right.emplace_back(x, y); 
+	void find_static_edges(const ll event_start, const ll event_end, bool staticEdgesForTheLeft) {
+		auto half_value = (event_end + event_start + 1) / 2;
+		auto start = staticEdgesForTheLeft ? half_value : event_start;
+		auto end = staticEdgesForTheLeft ? event_end : half_value - 1;
+
+		for (ll i = start; i <= end; i++) {
+			auto [type, x, y, t] = total_augmented_events[i];
+			if ((staticEdgesForTheLeft && type == 'D' && (t == -1 || t < start)) ||
+				(!staticEdgesForTheLeft && type == 'I' && (t == -1 || t > end))) {
+				(staticEdgesForTheLeft ? static_left : static_right).emplace_back(x, y);
 			}
 		}
 	}
 
-	void find_active_nodes(ll start_index, ll end_index, bool isleft) {
+
+	void find_active_nodes(const ll start_index, const ll end_index, bool isleft) {
 		auto &active_nodes = isleft ? left_active_nodes : right_active_nodes;
 		auto &active_nodes_list = isleft ? left_active_nodes_list : right_active_nodes_list;
 
-		for (ll v = start_index; v <= end_index; v++) {
-			ll u1 = get<1>(total_augmented_events[v]);
-			ll u2 = get<2>(total_augmented_events[v]);
-			
-			for (ll u : {u1, u2}) {
+		for (auto v = start_index; v <= end_index; v++) {
+			for (const auto u : {get<1>(total_augmented_events[v]), get<2>(total_augmented_events[v])}) {
 				if (!active_nodes[u]) {
 					active_nodes_list.push_back(u);
 					active_nodes[u] = true;
 				}
 			}
 		}
+
+		
 	}
 
+	//TODO maybe we have to do the same think with that
 	void clear_active_nodes() {
 		for (auto u : left_active_nodes_list) {
 			left_active_nodes[u] = false;
@@ -123,8 +126,8 @@ class Event {
 		static_right.clear();
 	}
 
-	bool query_exists_in_events(ll start, ll end) {
-		for (ll v = start; v <= end; v++) {
+	bool query_exists_in_events(const ll start, const ll end) {
+		for (auto v = start; v <= end; v++) {
 			if (get<0>(total_augmented_events[v]) == 'Q') {
 				return true;
 			}
