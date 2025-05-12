@@ -63,33 +63,30 @@ class Event {
 	}
 	
 	void print_static_edges() {
-		//cout << "-------------Static Left Edges:" << endl;
+		cout << "-------------Static Left Edges:" << endl;
 		for (const auto& edge : static_left) {
-			//cout << "(" << edge.first << ", " << edge.second << ")" << endl;
+			cout << "(" << edge.first << ", " << edge.second << ")" << endl;
 		}
-		//cout << "-----------------------" << endl;
+		cout << "-----------------------" << endl;
 
-		//cout << "-------------Static Right Edges:" << endl;
+		cout << "-------------Static Right Edges:" << endl;
 		for (const auto& edge : static_right) {
-			//cout << "(" << edge.first << ", " << edge.second << ")" << endl;
+			cout << "(" << edge.first << ", " << edge.second << ")" << endl;
 		}
-		//cout << "-----------------------" << endl;
+		cout << "-----------------------" << endl;
 	}
 	
-	void find_static_edges(const ll event_start, const ll event_end, bool staticEdgesForTheLeft) {
-		auto half_value = (event_end + event_start + 1) / 2;
-		auto start = staticEdgesForTheLeft ? half_value : event_start;
-		auto end = staticEdgesForTheLeft ? event_end : half_value - 1;
-
-		for (ll i = start; i <= end; i++) {
+	void find_static_edges(const ll event_start, const ll event_end) {
+		auto half_value = ceil((event_end + event_start) / 2.0);
+		for (auto i = event_start; i <= event_end; i++) {
 			auto [type, x, y, t] = total_augmented_events[i];
-			if ((staticEdgesForTheLeft && type == 'D' && (t == -1 || t < start)) ||
-				(!staticEdgesForTheLeft && type == 'I' && (t == -1 || t > end))) {
-				(staticEdgesForTheLeft ? static_left : static_right).emplace_back(x, y);
+			if (i >= half_value && type == 'D'&& (t == -1 || t < event_start)) {
+				static_left.emplace_back(x, y);
+			} else if (i < half_value && type == 'I' && (t == -1 || t > event_end)) {
+				static_right.emplace_back(x, y); 
 			}
 		}
 	}
-
 
 	void find_active_nodes(const ll start_index, const ll end_index, bool isleft) {
 		auto &active_nodes = isleft ? left_active_nodes : right_active_nodes;

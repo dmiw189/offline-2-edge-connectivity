@@ -3,32 +3,32 @@
 using ll = long long;
 
 void print_removed_map(const vector<ll> removed_map) {
-    //cout << "Size of removed_map: " << removed_map.size() << endl;
+    cout << "Size of removed_map: " << removed_map.size() << endl;
 
-    //cout << "Contents of removed_map: ";
+    cout << "Contents of removed_map: ";
     for (const auto& value : removed_map) {
-        //cout << value << " ";
+        cout << value << " ";
     }
-    //cout << endl;
+    cout << endl;
 }
 
 void print_temp_component(const vector<ll>& temp_component) {
-    //cout << "Size of temp_component: " << temp_component.size() << endl;
+    cout << "Size of temp_component: " << temp_component.size() << endl;
 
-    //cout << "Contents of temp_component: ";
+    cout << "Contents of temp_component: ";
     for (const auto& value : temp_component) {
-        //cout << value << " ";
+        cout << value << " ";
     }
-    //cout << endl;
+    cout << endl;
 }
 
 void print_for_error(ll node, ll component_node, vector<ll> bridge_tree_map, vector<ll> pruned_map) {
 		ll value = bridge_tree_map[component_node];
 		ll value_value = pruned_map[value]; 
-		//cout << "orig node=" << node << ", ";
-		//cout << "orig comp= " << component_node << ", ";
-		//cout << "b_tree comp= " << value << ", ";
-		//cout << "pruned comp= " << value_value << endl << "---------------------";
+		cout << "orig node=" << node << ", ";
+		cout << "orig comp= " << component_node << ", ";
+		cout << "b_tree comp= " << value << ", ";
+		cout << "pruned comp= " << value_value << endl << "---------------------";
 }
 
 
@@ -114,6 +114,7 @@ void extract_edges(const vector<vector<ll>> &adj, vector<pair<ll, ll>> &edges) {
             if (u < v) edges.emplace_back(u, v);
 }
 
+
 void update_graph(BridgeGraph &b_object, vector<ll> &removed_map){
 	ll counter_non_removed_nodes= 0, u_map, v_map;
 	  
@@ -142,6 +143,7 @@ void update_graph(BridgeGraph &b_object, vector<ll> &removed_map){
 	add_edges_to_graph(edges, b_object.enhanced_total_neighbours);
 }
 
+
 ll original_res_mapping(const ll component_node, const vector<ll> &bridge_tree_map, const vector<ll> &pruned_map) {  
 	return pruned_map[bridge_tree_map[component_node]]; 
 }
@@ -154,7 +156,8 @@ void update_components(const vector<ll> &bridge_tree_map, unordered_map<ll, ll> 
 	umap = move(temp_umap);
 }
 
-void final_pruning(BridgeGraph &b_object, const vector<ll> &original_active_nodes_list){
+
+void final_pruning(BridgeGraph &b_object, const vector<ll> original_active_nodes_list){
 	prune_inactive_bridge_nodes_1(b_object);
 	prune_inactive_bridge_nodes_2(b_object);
 	prune_inactive_bridge_nodes_0(b_object);

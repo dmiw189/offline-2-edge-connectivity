@@ -8,19 +8,24 @@ vector<ll> time_active, time_static, time_bridges, time_pruning;
 
 void test_print(BridgeGraph &bridge_graph, Event &ev, ll start_index, ll end_index, bool left) {
     const string side = left ? "left" : "right";
-    //cout << "-------Total " << side << " events [" << start_index << ", " << end_index << "]-------" << endl;
+    cout << "-------Total " << side << " events [" << start_index << ", " << end_index << "]-------" << endl;
     for (int i = start_index; i <= end_index; ++i) {
         auto &event = ev.total_augmented_events[i];
-        //cout << get<0>(event) << " " << get<1>(event) << " " << get<2>(event) << " " << get<3>(event) << endl;
+        cout << get<0>(event) << " " << get<1>(event) << " " << get<2>(event) << " " << get<3>(event) << endl;
     }
-    //cout << "-----------------\n\n";
+    cout << "-----------------\n\n";
 
-    //cout << "-------" << side << " active nodes [" << start_index << ", " << end_index << "]-------" << endl;
+    cout << "-------" << side << " active nodes [" << start_index << ", " << end_index << "]-------" << endl;
     auto &active_nodes = left ? ev.left_active_nodes : ev.right_active_nodes;
     for (int i = 0; i < bridge_graph.total_vertices; ++i) {
-        //cout << i << ": " << (active_nodes[i] ? "Active" : "Inactive") << endl;
+        cout << i << ": " << (active_nodes[i] ? "Active" : "Inactive") << endl;
     }
-    //cout << "--------------------\n";
+    cout << "--------------------\n";
+}
+
+void signalHandler(int signal) {
+    cerr << "Error: Signal " << signal << " received." << endl;
+    exit(signal);
 }
 
 void print_time(vector<ll> &time, string text) {
@@ -29,8 +34,8 @@ void print_time(vector<ll> &time, string text) {
         return;
     }
 
-    auto total_time = accumulate(time.begin(), time.end(), 0LL);
-    auto avg_time = total_time / time.size();
+    ll total_time = accumulate(time.begin(), time.end(), 0LL);
+    ll avg_time = total_time / time.size();
     auto [min_time, max_time] = minmax_element(time.begin(), time.end());
 
 	cout << "Time spent at " + text + ":\n"; 
@@ -43,7 +48,7 @@ void print_time(vector<ll> &time, string text) {
 
 
 void print_time_now(ll time) {
-    //cout << "Total Time: " << time << " ms\n";
+    cout << "Total Time: " << time << " ms\n";
 }
 
 vector<bool> read_from_file(string file_name) {
@@ -66,7 +71,7 @@ void process_single_event(const Event &ev, ll index, vector<bool> &results, cons
 	if (type == 'Q') {
 		results.push_back(umap.at(x) == umap.at(y));
 	}
-	//cout << " Single Process = [" << umap.at(x) << ", " << umap.at(y) << "]" << endl;
+	cout << " Single Process = [" << umap.at(x) << ", " << umap.at(y) << "]" << endl;
 }
 
 void compute_static_component_edges(const vector<pair<ll, ll>> &static_edges,  vector<pair<ll, ll>> &static_component_edges, 
@@ -74,7 +79,8 @@ void compute_static_component_edges(const vector<pair<ll, ll>> &static_edges,  v
     
 	ll comp_1, comp_2; 
 
-    //cout << "---------Static Component Edges from the " << (isleft ? "left" : "right") << " side for the " << (!isleft ? "left" : "right") << "--------------" << endl;
+    cout << "---------Static Component Edges from the " << (isleft ? "left" : "right") 
+        << " side for the " << (!isleft ? "left" : "right") << "--------------" << endl;
 
     for (const auto [u, v] : static_edges) {
         try {
@@ -88,13 +94,13 @@ void compute_static_component_edges(const vector<pair<ll, ll>> &static_edges,  v
             continue; // Skip to the next edge
         }
 
-        //cout << "[" << comp_1 << ", " << comp_2 << "]" << endl; 
+        cout << "[" << comp_1 << ", " << comp_2 << "]" << endl; 
 
         if (comp_1 != comp_2) {
             static_component_edges.emplace_back(comp_1, comp_2);
         }
     }
-    //cout << "----------------------\n";
+    cout << "----------------------\n";
 }
 
 void compute_active_component_nodes(const vector<ll> active_nodes_list, vector<bool> &active_component_nodes, const bool isleft, const unordered_map<ll, ll> &umap) {
@@ -103,82 +109,120 @@ void compute_active_component_nodes(const vector<ll> active_nodes_list, vector<b
     }
 }
 
-void compute_2_edge_connectivity(BridgeGraph bridge_graph, Event ev, const ll start_index, const ll end_index, vector<bool>& results, 
-                                 unordered_map<ll, ll> umap_left, unordered_map<ll, ll> umap_right) {
-    
-	// Base check: if no events exist in the range, return
-    if (!ev.query_exists_in_events(start_index, end_index)) return;
+void compute_2_edge_connectivity(BridgeGraph bridge_graph, Event ev, const ll start_index, const ll end_index, vector <bool> &results, 
+		unordered_map<ll, ll> umap_left, unordered_map<ll, ll> umap_right, bool right= false){
+	
+	if (!ev.query_exists_in_events(start_index, end_index)) return;
+	
+	auto start = chrono::high_resolution_clock::now();
+	cout.clear();
+	cout << "Total events: [start= " << start_index << ", end= " << end_index << "] from " << (right ? "RIGHT" : "LEFT") << " side. " << endl;
+	cout.setstate(std::ios_base::failbit);
 
-    // cout << "[" << start_index << ", " << end_index << "]" << endl;
-
-    // Handle single-event case
-    if (start_index == end_index) {
-        process_single_event(ev, start_index, results, umap_left);
-        return;
+	if (start_index == end_index) {
+		process_single_event(ev, start_index, results, umap_left);
+		return;
     }
+	
+	bridge_graph.print_enhanced_graph("At the beginning----");
+	
+	ev.clear_active_nodes();
+	ev.clear_static_edges();
 
-    // Initial setup
-    bridge_graph.print_enhanced_graph("At the beginning----");
-    ev.clear_active_nodes();
-    ev.clear_static_edges();
+	BridgeGraph right_bridge_graph = bridge_graph;
 
-    BridgeGraph right_bridge_graph = bridge_graph;
-    bridge_graph.set_umap(umap_left);
-    right_bridge_graph.set_umap(umap_right);
+	bridge_graph.set_umap(umap_left);
+	right_bridge_graph.set_umap(umap_right);
 
-    // Determine left and right ranges
-    ll left_start = start_index;
-    ll left_end = left_start + floor((end_index - start_index) / 2);
-    ll right_start = left_end + 1;
-    ll right_end = end_index;
+	ll left_start= start_index;
+	ll left_end = left_start + floor((end_index - start_index)/2);
+	ll right_start= left_end + 1;
+	ll right_end= end_index;
+	vector<pair<ll, ll>> left_static_component_edges, right_static_component_edges;
 
-    // Initialize static component edges for left and right
-    vector<pair<ll, ll>> left_static_component_edges, right_static_component_edges;
+	// if (ev.query_exists_in_events(left_start, left_end)) {
+	// 	return;
+	// }
+	// if (ev.query_exists_in_events(right_start, right_end)) {
+	// 	return;
+	// }
 
-    // Query event existence for left and right ranges
-    bool leftExists = ev.query_exists_in_events(left_start, left_end);
-    bool rightExists = ev.query_exists_in_events(right_start, right_end);
+	auto start_time = chrono::high_resolution_clock::now();
 
-    // Lambda to handle processing for each side
-    auto process_side = [&](bool exists, auto& ev_nodes_list, auto& static_edges, auto& static_component_edges,
-                            auto& umap, BridgeGraph& graph, ll start, ll end, bool isLeft) {
-        if (!exists) return;
+	ev.find_active_nodes(left_start, left_end, true);
+	ev.find_active_nodes(right_start, right_end, false);
 
-        // Find active nodes and compute active component nodes
-        ev.find_active_nodes(start, end, isLeft);
-        vector<bool> active_component_nodes(graph.total_vertices, false);
-        compute_active_component_nodes(ev_nodes_list, active_component_nodes, isLeft, umap);
+	vector<bool> left_active_component_nodes(bridge_graph.total_vertices, false);
+	vector<bool> right_active_component_nodes(bridge_graph.total_vertices, false);
 
-        // Find and compute static component edges
-        ev.find_static_edges(start_index, end_index, isLeft);
-        compute_static_component_edges(static_edges, static_component_edges, isLeft, umap);
+	compute_active_component_nodes(ev.left_active_nodes_list, left_active_component_nodes, true, umap_left);
+	compute_active_component_nodes(ev.right_active_nodes_list, right_active_component_nodes, false, umap_right);
+	
+	auto end_time = chrono::high_resolution_clock::now();
+	auto time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
+	time_active.push_back(time);
 
-        // Add static component edges to graph
-        add_edges_to_graph(static_component_edges, graph.enhanced_total_neighbours);
+	
+	start_time = chrono::high_resolution_clock::now();
+	ev.find_static_edges(start_index, end_index); 
+	// ev.print_static_edges();
+	compute_static_component_edges(ev.static_left, left_static_component_edges, true, umap_left);
+	add_edges_to_graph(left_static_component_edges, bridge_graph.enhanced_total_neighbours);
+	compute_static_component_edges(ev.static_right, right_static_component_edges, false, umap_right);
+	add_edges_to_graph(right_static_component_edges, right_bridge_graph.enhanced_total_neighbours);
+	end_time = chrono::high_resolution_clock::now();
+	time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
+	time_static.push_back(time);
 
-        // Construct bridges and prune
-        graph.construct_bridges(active_component_nodes);
-        final_pruning(graph, ev_nodes_list);
+	test_print(bridge_graph, ev, left_start, left_end, true);
+	test_print(right_bridge_graph, ev, right_start, right_end, false);
 
-        // Clear the graph
-        graph.clear();
+	start_time = chrono::high_resolution_clock::now();
+	cout << "-----Start Bridge Tree Stage-------" << endl;
+	cout << "--------Left-------" << endl;
+	bridge_graph.construct_bridges(left_active_component_nodes);
+	cout << "--------Right-------" << endl;
+	right_bridge_graph.construct_bridges(right_active_component_nodes);
+	cout << "-----End Bridge Tree Stage-------" << endl;
+	end_time = chrono::high_resolution_clock::now();
+    time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
+	time_bridges.push_back(time);
 
-        // Recursive call for further subdivisions
-        compute_2_edge_connectivity(graph, ev, start, end, results, umap, umap);
-    };
+	start_time = chrono::high_resolution_clock::now();
 
-    // Process left and right sides
-    process_side(leftExists, ev.left_active_nodes_list, ev.static_left, left_static_component_edges,
-                 umap_left, bridge_graph, left_start, left_end, true);
+	cout << "-----Start Pruning Stage-------" << endl;
+	cout << "--------Left-------" << endl;
+	final_pruning(bridge_graph, ev.left_active_nodes_list);
+	cout << "--------Right-------" << endl;
+	final_pruning(right_bridge_graph, ev.right_active_nodes_list);
+	cout << "-----End Pruning Stage-------" << endl;
 
-    process_side(rightExists, ev.right_active_nodes_list, ev.static_right, right_static_component_edges,
-                 umap_right, right_bridge_graph, right_start, right_end, false);
+	end_time = chrono::high_resolution_clock::now();
+    time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
+	time_pruning.push_back(time);
+	
+	bridge_graph.clear();	
+	right_bridge_graph.clear(); 
+
+	// auto end = chrono::high_resolution_clock::now();
+	// time = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
+	// cout.clear();
+	// cout << "Time Spent = " << time << "ms\n";
+	// cout.setstate(std::ios_base::failbit);
+
+	compute_2_edge_connectivity(bridge_graph, ev, left_start, left_end, results, umap_left, umap_left);
+	compute_2_edge_connectivity(right_bridge_graph, ev, right_start, right_end, results, umap_right, umap_right, true);
 }
 
+
 int main(int argc, char *argv[]){
+
+	signal(SIGSEGV, signalHandler); 
+    signal(SIGABRT, signalHandler); 
+
 	while(true) {
 		string z;
-		cout << "Give the input id" << endl;
+		cout << "You need to give the id (as number) of the graph inside the graph folder" << endl;
 		cin >> z;
 
 		if (z == "exit") {
@@ -193,8 +237,8 @@ int main(int argc, char *argv[]){
 		Event ev(z, vertices);
 		ev.read_event_file();
 
-		// cout << "Start Program: " << z << endl;
-		//cout.setstate(std::ios_base::failbit);
+		cout << "Start the Program with input: " << z << endl;
+		cout.setstate(std::ios_base::failbit);
 
 		unordered_map<ll, ll> umap;
 		for (auto i = 0; i < vertices; i++) {
@@ -206,21 +250,21 @@ int main(int argc, char *argv[]){
 
 		compute_2_edge_connectivity(bridge_graph, ev, start_index, end_index, results, umap, umap);
 
-		//cout.clear();
-		// print_time(time_active, "Active Nodes");
-		// print_time(time_static, "Static Edges");
-		// print_time(time_bridges, "Bridges");
-		// print_time(time_pruning, "Pruning");
+		cout.clear();
+		print_time(time_active, "Active Nodes");
+		print_time(time_static, "Static Edges");
+		print_time(time_bridges, "Bridges");
+		print_time(time_pruning, "Pruning");
 		
 		string output_file = "output_files/output_" + z + ".txt"; 
 		vector<bool> correct_results = read_from_file(output_file);
 
-		//cout << "----Results---\n"; 
+		cout << "----Results---\n"; 
 		// for (bool res : results){
-		// 	//cout << res << endl;
+		// 	cout << res << endl;
 		// }
 
-		cout << (correct_results == results ? "CORRECT output!" : "WRONG output!") << endl;
+		cout << (correct_results == results ? "CORRECT!!!" : "WRONG!!!") << endl;
 	}
 	return 0;
 }

@@ -19,17 +19,17 @@ void compute_connectivity(string z, ll total_vertices, vector<vector<ll>> adj, v
 		while ((infile >> query >> v1 >> v2)){
 		  switch (query){
 			case 'D':
-				// cout << "Removed " << v1 << " " << v2 << endl;
+				cout << "Removed " << v1 << " " << v2 << endl;
 				remove_edge(v1, v2, adj);
 				break;
 			
 			case 'I':
-				// cout << "Added " << v1 << " " << v2 << endl;
+				cout << "Added " << v1 << " " << v2 << endl;
 				insert_edge(v1, v2, adj);
 				break;
 			
 			case 'Q':
-				// cout << "Check Biconnectivity " << v1 << " " << v2 << endl;
+				cout << "Check Biconnectivity " << v1 << " " << v2 << endl;
 				BridgeGraph b(total_vertices, adj);
 				find_bridges_simple(total_vertices, b.total_neighbours, b.total_bridges);	  
 				find_bridge_tree_simple(total_vertices, b.total_neighbours, b.bridge_tree_map, b.total_bridges);
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]){
 	// cout.setstate(ios_base::failbit);
 
 	
-	cout << "Give the input id" << endl;
+	cout << "You need to give the id of the graph inside the graph folder" << endl;
 	
 	string z;
 	cin >> z;

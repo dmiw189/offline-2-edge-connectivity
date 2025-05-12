@@ -24,9 +24,9 @@ class BridgeGraph {
 	queue<ll> leaves;
 	vector<bool> bridge_active_nodes;
 	vector <bool> removed;
-	ll total_bridge_vertices = 0;
+	ll total_bridge_vertices;
 	
-    BridgeGraph(string temp_z): total_vertices(read_total_vertices(temp_z)), total_neighbours(total_vertices), enhanced_total_neighbours(total_vertices), 
+    BridgeGraph(string temp_z) : total_vertices(read_total_vertices(temp_z)), total_neighbours(total_vertices), enhanced_total_neighbours(total_vertices), 
 			umap_ptr(nullptr){
 	  z= temp_z;
     }
@@ -68,7 +68,64 @@ class BridgeGraph {
 		total_bridge_vertices = 0;  
 		umap_ptr = nullptr;           
 	}
+	
+	void test_print_components(string z) {
+		cout << "-------components(" << z << ")-------" << endl;
+		try {
+			if (umap_ptr == nullptr) {
+				throw runtime_error("Component pointer is null.");
+			}
+			for (size_t i = 0; i < umap_ptr->size(); i++) {
+				cout << i << ": " << (*umap_ptr)[i] << endl;
+			}
+			cout << "--------------" << endl;
+		} catch (const exception& e) {
+			cerr << "Exception caught: " << e.what() << endl;
+		} catch (...) {
+			cerr << "An unknown error occurred in test_print_components." << endl;
+		}
+	}
+	
+	void test_print_bridge_tree_map(const string &z) {
+		cout << "-------bridge tree map - " << z << ".-------" << endl;
+		for (auto i = 0; i < bridge_tree_map.size(); i++) {
+			cout << i << ": " << bridge_tree_map[i] << endl;
+		}
+		cout << "--------------" << endl;
+	}
 
+	void print_enhanced_graph(string z){
+		cout << "-------Graph - " << z << ".-------" << endl;
+		for (auto i = 0; i < enhanced_total_neighbours.size(); i++){
+			cout << i << ": ";
+			for (const auto u : enhanced_total_neighbours[i]) {
+				cout << get<0>(u) << " ";
+			}
+			cout << endl;		  
+		  }
+		cout << "-----------" << endl;
+	}
+
+	void test_print_graph(vector<vector<ll>> adj, string z){
+		cout << "-------Graph - " << z << ".-------" << endl;
+		for (auto i = 0; i < adj.size(); i++){
+			cout << i << ": ";
+			for (const auto u : adj[i]) {
+				cout << u << " ";
+			}
+			cout << endl;		  
+		  }
+		cout << "-----------" << endl;
+	}
+
+	void print_edges() {
+		cout << "--------Bridge Edges -------\n";
+		for (const auto e : bridge_edges) {
+			cout << "(" << e.first << ", " << e.second << ")" << endl; 
+		}
+		cout << "------------------------\n";
+	}
+	
 	void construct_bridges(const vector <bool> active_component_nodes){
 		
 		print_enhanced_graph("before bridge construction");
@@ -113,63 +170,6 @@ class BridgeGraph {
 		test_print_graph(total_bridge_neighbours, "after bridge tree construction");
 		test_print_bridge_tree_map("before pruning");
 	}
+   
 
-	
-	void test_print_components(string z) {
-		//cout << "-------components(" << z << ")-------" << endl;
-		try {
-			if (umap_ptr == nullptr) {
-				throw runtime_error("Component pointer is null.");
-			}
-			for (size_t i = 0; i < umap_ptr->size(); i++) {
-				//cout << i << ": " << (*umap_ptr)[i] << endl;
-			}
-			//cout << "--------------" << endl;
-		} catch (const exception& e) {
-			cerr << "Exception caught: " << e.what() << endl;
-		} catch (...) {
-			cerr << "An unknown error occurred in test_print_components." << endl;
-		}
-	}
-	
-	void test_print_bridge_tree_map(const string &z) {
-		//cout << "-------bridge tree map - " << z << ".-------" << endl;
-		for (auto i = 0; i < bridge_tree_map.size(); i++) {
-			//cout << i << ": " << bridge_tree_map[i] << endl;
-		}
-		//cout << "--------------" << endl;
-	}
-
-	void print_enhanced_graph(string z){
-		//cout << "-------Graph - " << z << ".-------" << endl;
-		for (auto i = 0; i < enhanced_total_neighbours.size(); i++){
-			//cout << i << ": ";
-			for (const auto u : enhanced_total_neighbours[i]) {
-				//cout << get<0>(u) << " ";
-			}
-			//cout << endl;		  
-		  }
-		//cout << "-----------" << endl;
-	}
-
-	void test_print_graph(vector<vector<ll>> adj, string z){
-		//cout << "-------Graph - " << z << ".-------" << endl;
-		for (auto i = 0; i < adj.size(); i++){
-			//cout << i << ": ";
-			for (const auto u : adj[i]) {
-				//cout << u << " ";
-			}
-			//cout << endl;		  
-		  }
-		//cout << "-----------" << endl;
-	}
-
-	void print_edges() {
-		//cout << "--------Bridge Edges -------\n";
-		for (const auto e : bridge_edges) {
-			//cout << "(" << e.first << ", " << e.second << ")" << endl; 
-		}
-		//cout << "------------------------\n";
-	}
-	
 };
