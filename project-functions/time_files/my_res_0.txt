@@ -1,0 +1,5 @@
+10: 0.001sec, Correct Output!
+20: 0.001sec, Correct Output!
+30: 0.001sec, Wrong Output!
+40: 0.002sec, Wrong Output!
+50: 0.003sec, Wrong Output!

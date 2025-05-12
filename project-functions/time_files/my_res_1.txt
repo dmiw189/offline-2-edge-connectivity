@@ -1,0 +1,5 @@
+40: 0.004sec, Wrong Output!
+80: 0.01sec, Wrong Output!
+120: 0.013sec, Wrong Output!
+160: 0.021sec, Wrong Output!
+200: 0.025sec, Wrong Output!

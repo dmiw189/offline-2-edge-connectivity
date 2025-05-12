@@ -1,0 +1,5 @@
+6000: 26.148sec, Wrong Output!
+12000: 59.264sec, Wrong Output!
+18000: 113.934sec, Wrong Output!
+24000: 172.134sec, Wrong Output!
+30000: 195.078sec, Wrong Output!

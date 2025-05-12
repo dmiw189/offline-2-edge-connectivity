@@ -55,3 +55,18 @@ void read_graph(string z, vector < vector <ll> > &total_neighbours){
     
   infile.close();
 }
+
+vector<bool> read_from_file(string file_name) {
+	ifstream file(file_name); 
+    if (!file) {
+        cerr << "Error: Could not open output file: " << file_name << endl;
+        exit;
+    }
+    vector<bool> file_results;
+    bool value;
+    while (file >> value) {
+        file_results.push_back(value);
+    }
+    file.close();
+	return file_results;
+}

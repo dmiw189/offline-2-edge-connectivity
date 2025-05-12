@@ -1,15 +1,25 @@
-#include <iostream>
-#include <cmath>
+#include <bits/stdc++.h>
 #include "Bridge_Tree.h"
+#include <functional>
 
 using ll = long long;
 
+struct pair_hash {
+    template <class T1, class T2>
+    std::size_t operator() (const std::pair<T1, T2> &p) const {
+        auto h1 = std::hash<T1>{}(p.first);
+        auto h2 = std::hash<T2>{}(p.second);
+        return h1 ^ (h2 << 1); 
+    }
+};
+
 class Event {       
 	public:                 
-		ll total_vertices;
-		string z;
+		ll total_vertices, total_orig_edges, total_events;
+		string graph_id;
 
 		vector<tuple<char, ll, ll, ll>> total_augmented_events;
+
 		vector<pair<ll, ll>> static_left;
 		vector<pair<ll, ll>> static_right;
 
@@ -20,13 +30,13 @@ class Event {
 		vector<ll> left_active_nodes_list;
 		vector<ll> right_active_nodes_list;
     
-	Event(const string temp_z, const ll temp_total_vertices): left_active_nodes(temp_total_vertices, false), right_active_nodes(temp_total_vertices, false){     
-		z= temp_z;
+	Event(const string temp_graph_id, const ll temp_total_vertices): left_active_nodes(temp_total_vertices, false), right_active_nodes(temp_total_vertices, false) {     
+		graph_id= temp_graph_id;
 		total_vertices= temp_total_vertices;
     }
 
-	Event(const string temp_z){     
-		z= temp_z;
+	Event(const string temp_graph_id) {
+		graph_id= temp_graph_id;
     }
 
 	void add_to_augmented_events(const vector<tuple<char, ll, ll>> &event_list) {
@@ -35,9 +45,9 @@ class Event {
 		}
 	}
 
-	void read_event_file() {
-		read_graph_events(z);
-		read_events(z);
+	void read_event_file(string event_id) {
+		read_graph_events(graph_id);
+		read_events(graph_id + "." + event_id);
 	  	add_to_augmented_events(graph_events);
 		add_to_augmented_events(events);
 	  
@@ -51,7 +61,6 @@ class Event {
 					get<3>(total_augmented_events[t])= s;
 					event_mapping[nodes_pair]= -1;
 					break;
-
 				case 'I':
 					event_mapping[nodes_pair]= s;
 					break;
@@ -60,33 +69,37 @@ class Event {
 			}
 			s++;
 		}
+		event_mapping.clear();
 	}
 	
 	void print_static_edges() {
-		cout << "-------------Static Left Edges:" << endl;
+		//cout << "-------------Static Left Edges:" << endl;
 		for (const auto& edge : static_left) {
-			cout << "(" << edge.first << ", " << edge.second << ")" << endl;
+			//cout << "(" << edge.first << ", " << edge.second << ")" << endl;
 		}
-		cout << "-----------------------" << endl;
+		//cout << "-----------------------" << endl;
 
-		cout << "-------------Static Right Edges:" << endl;
+		//cout << "-------------Static Right Edges:" << endl;
 		for (const auto& edge : static_right) {
-			cout << "(" << edge.first << ", " << edge.second << ")" << endl;
+			//cout << "(" << edge.first << ", " << edge.second << ")" << endl;
 		}
-		cout << "-----------------------" << endl;
+		//cout << "-----------------------" << endl;
 	}
 	
-	void find_static_edges(const ll event_start, const ll event_end) {
-		auto half_value = ceil((event_end + event_start) / 2.0);
-		for (auto i = event_start; i <= event_end; i++) {
+	void find_static_edges(const ll event_start, const ll event_end, bool staticEdgesForTheLeft) {
+		auto half_value = (event_end + event_start + 1) / 2;
+		auto start = staticEdgesForTheLeft ? half_value : event_start;
+		auto end = staticEdgesForTheLeft ? event_end : half_value - 1;
+
+		for (ll i = start; i <= end; i++) {
 			auto [type, x, y, t] = total_augmented_events[i];
-			if (i >= half_value && type == 'D'&& (t == -1 || t < event_start)) {
-				static_left.emplace_back(x, y);
-			} else if (i < half_value && type == 'I' && (t == -1 || t > event_end)) {
-				static_right.emplace_back(x, y); 
+			if ((staticEdgesForTheLeft && type == 'D' && (t == -1 || t < start)) ||
+				(!staticEdgesForTheLeft && type == 'I' && (t == -1 || t > end))) {
+				(staticEdgesForTheLeft ? static_left : static_right).emplace_back(x, y);
 			}
 		}
 	}
+
 
 	void find_active_nodes(const ll start_index, const ll end_index, bool isleft) {
 		auto &active_nodes = isleft ? left_active_nodes : right_active_nodes;
@@ -135,16 +148,17 @@ class Event {
 	private: 
 		vector<tuple<char, ll, ll>> events;
 		vector<tuple <char, ll, ll>> graph_events;
-		map<pair<ll, ll>, ll> event_mapping;
+		unordered_map<pair<ll, ll>, ll, pair_hash> event_mapping;
 
 
-	void read_graph_events(string z) {
+	void read_graph_events(string id) {
 		int T; 	
 		ll v1, v2, file_edges, total_vertices, s= 0;
-		ifstream infile("..\\graphs\\graph_"+z+".txt");	
+		ifstream infile("..\\graphs\\graph_" + id + ".txt");	
 		if(infile.is_open()){
 			infile>>T; 
 			infile >> total_vertices >> file_edges;
+			total_orig_edges = file_edges;
 			while ((infile >> v1 >> v2)){	  
 				graph_events.push_back(make_tuple('I', v1, v2));
 			}
@@ -152,14 +166,15 @@ class Event {
 		}
 	}
 
-	void read_events(string z){
-		int T; 	
-		ll total_lines, v1, v2, file_edges, total_vertices, s= 0;
+	void read_events(string id){
+		// int T; 	
+		ll total_lines, v1, v2, file_edges, total_vertices, s = 0;
 		char query;
-		ifstream infile("..\\events\\events_"+z+".txt");	
+		ifstream infile("..\\events\\event_" + id + ".txt");	
 		if(infile.is_open()){
-			infile>>T; 
+			// infile>>T; 
 			infile >> total_lines;
+			total_events = total_lines;
 			while ((infile >> query >> v1 >> v2)){	  
 				events.push_back(make_tuple(query, v1, v2));
 			}
