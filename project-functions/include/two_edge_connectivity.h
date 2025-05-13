@@ -90,7 +90,7 @@ void compute_2_edge_connectivity(BridgeGraph bridge_graph, Event ev, const ll st
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // cout << "[" << start_index << ", " << end_index << "]" << endl;
+    cout << "We are at: [" << start_index << ", " << end_index << "]" << endl;
 
     // Handle single-event case
     if (start_index == end_index) {
@@ -133,8 +133,8 @@ void compute_2_edge_connectivity(BridgeGraph bridge_graph, Event ev, const ll st
     // Query event existence for left and right ranges
 
     start = chrono::high_resolution_clock::now();
-    bool leftExists = ev.query_exists_in_events(left_start, left_end);
-    bool rightExists = ev.query_exists_in_events(right_start, right_end);
+    bool queriesExistAtTheLeftSide = ev.query_exists_in_events(left_start, left_end);
+    bool queriesExistAtTheRightSide = ev.query_exists_in_events(right_start, right_end);
 
     end = chrono::high_resolution_clock::now();
     duration = chrono::duration_cast<chrono::nanoseconds>(end - start);
@@ -142,9 +142,14 @@ void compute_2_edge_connectivity(BridgeGraph bridge_graph, Event ev, const ll st
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Lambda to handle processing for each side
-    auto process_side = [&](bool exists, auto& ev_nodes_list, auto& static_edges, auto& static_component_edges,
-                            auto& umap, BridgeGraph& graph, ll start, ll end, bool isLeft) {
-        if (!exists) return;
+    auto process_side = [&](const bool queriesExist, auto& ev_nodes_list, auto& static_edges, auto& static_component_edges,
+                            auto& umap, BridgeGraph& graph, const ll start, const ll end, const bool isLeft) {
+
+        cout << "We are at: [" << start << ", " << end << "]" << endl;
+        if (!queriesExist) {
+            cout << "No queries!" << endl;
+            return;
+        }
 
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         
@@ -225,10 +230,10 @@ void compute_2_edge_connectivity(BridgeGraph bridge_graph, Event ev, const ll st
     };
 
     // Process left and right sides
-    process_side(leftExists, ev.left_active_nodes_list, ev.static_left, left_static_component_edges,
+    process_side(queriesExistAtTheLeftSide, ev.left_active_nodes_list, ev.static_left, left_static_component_edges,
                  umap_left, bridge_graph, left_start, left_end, true);
 
-    process_side(rightExists, ev.right_active_nodes_list, ev.static_right, right_static_component_edges,
+    process_side(queriesExistAtTheRightSide, ev.right_active_nodes_list, ev.static_right, right_static_component_edges,
                  umap_right, right_bridge_graph, right_start, right_end, false);
 }
 

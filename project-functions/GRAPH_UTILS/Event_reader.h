@@ -73,17 +73,17 @@ class Event {
 	}
 	
 	void print_static_edges() {
-		//cout << "-------------Static Left Edges:" << endl;
+		cout << "-------------Static Left Edges:" << endl;
 		for (const auto& edge : static_left) {
-			//cout << "(" << edge.first << ", " << edge.second << ")" << endl;
+			cout << "(" << edge.first << ", " << edge.second << ")" << endl;
 		}
-		//cout << "-----------------------" << endl;
+		cout << "-----------------------" << endl;
 
-		//cout << "-------------Static Right Edges:" << endl;
+		cout << "-------------Static Right Edges:" << endl;
 		for (const auto& edge : static_right) {
-			//cout << "(" << edge.first << ", " << edge.second << ")" << endl;
+			cout << "(" << edge.first << ", " << edge.second << ")" << endl;
 		}
-		//cout << "-----------------------" << endl;
+		cout << "-----------------------" << endl;
 	}
 	
 	void find_static_edges(const ll event_start, const ll event_end, bool staticEdgesForTheLeft) {

@@ -2,24 +2,11 @@
 
 using ll = long long;
 
-void print_removed_map(const vector<ll> removed_map) {
-    //cout << "Size of removed_map: " << removed_map.size() << endl;
-
-    //cout << "Contents of removed_map: ";
-    for (const auto& value : removed_map) {
-        //cout << value << " ";
-    }
-    //cout << endl;
-}
-
-void print_temp_component(const vector<ll>& temp_component) {
-    //cout << "Size of temp_component: " << temp_component.size() << endl;
-
-    //cout << "Contents of temp_component: ";
-    for (const auto& value : temp_component) {
-        //cout << value << " ";
-    }
-    //cout << endl;
+void print_removed_map(const vector<ll>& map, string map_name) {
+    cout << "Size of " + map_name + ": " << map.size() << endl;
+    cout << "Contents of " + map_name + ": ";
+    for (const auto& value : map) cout << value << " ";
+    cout << endl;
 }
 
 void print_for_error(ll node, ll component_node, vector<ll> bridge_tree_map, vector<ll> pruned_map) {

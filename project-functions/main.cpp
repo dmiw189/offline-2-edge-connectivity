@@ -7,13 +7,13 @@ using ll = long long;
 // ─────────────────────────────────────────────────────────────
 // Input handling
 // ─────────────────────────────────────────────────────────────
-void prompt_user_input(int& from, int& to, int& numEventFiles) {
-    cout << "Enter from (0-8), to (from-8), and number of event files (1-5): ";
-    while (!(cin >> from >> to >> numEventFiles) ||
-           from < 0 || from > 8 ||
-           to < from || to > 8 ||
-           numEventFiles < 1 || numEventFiles > 5) {
-        cout << "Invalid input. Please enter from (0-8), to (from-8), and number of event files (1-5): ";
+void prompt_user_input(int& graph_from, int& graph_to, int& event_from, int& event_to) {
+    cout << "Enter graph id from (0-8), to (from-8) and event id from (1-5), to (from - 5): ";
+    while (!(cin >> graph_from >> graph_to >> event_from >> event_to) ||
+           graph_from < 0 || graph_from > 8 ||
+           graph_to < graph_from || graph_to > 8 ||
+           event_from < 1 || event_from > 5 || event_to < event_from || event_to > 5) {
+        cout << "Invalid input. raph id from (0-8), to (from-8). Enter event id from (1-5), to (from - 5): ";
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
@@ -32,8 +32,28 @@ unordered_map<ll, ll> create_identity_map(ll total_vertices) {
 // Output Validation
 // ─────────────────────────────────────────────────────────────
 bool validate_results(const string graph_id, const string event_id, const vector<bool>& results) {
-    vector<bool> expected = read_from_file("output_files/output_file_" + graph_id + "." + event_id + ".txt");
-    return results == expected;
+    string id = graph_id + "." + event_id;
+    vector<bool> expected = read_from_file("output_files/output_file_" + id + ".txt");
+    bool correct = expected == results;
+    
+    ofstream out("output_files/my_output_" + id + ".txt");
+    if (!out) {
+        cerr << "Failed to open output file for graph " << id << ".\n";
+        exit;
+    }
+
+    if (correct) {
+        out << "Correct Answers" <<  endl;
+    } else {
+        out << "Wrong Answers" << endl << "Expected -> Result" << endl;
+        for (auto i = 0; i < results.size(); i++) {
+            bool isDiff = results[i] != expected[i];
+            out << expected[i] << "->" << results[i] << (isDiff ? "!!!" : "") << endl;
+        }
+    }
+    out << endl;
+
+    return correct;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -94,22 +114,22 @@ void run_test(const string& graph_id, int event_index, ofstream& time_output) {
 // ─────────────────────────────────────────────────────────────
 // Full Range Test Execution
 // ─────────────────────────────────────────────────────────────
-void run_all_tests(int from, int to, int num_files) {
+void run_all_tests(const int graph_from, const int graph_to, const int event_from, const int event_to) {
     const string output_dir = "time_files";
     filesystem::create_directory(output_dir);
 
-    for (int graph_index = from; graph_index < to; ++graph_index) {
-        string id = to_string(graph_index);
-        cout << "Input graph ID = " << id << endl;
+    for (int graph_index = graph_from; graph_index < graph_to; ++graph_index) {
+        string graph_id = to_string(graph_index);
+        cout << "Input graph ID = " << graph_id << endl;
 
-        ofstream out(output_dir + "/my_res_" + id + ".txt");
+        ofstream out(output_dir + "/my_res_" + graph_id + ".txt");
         if (!out) {
-            cerr << "Failed to open output file for graph " << id << ".\n";
-            continue;
+            cerr << "Failed to open output file for graph " << graph_id << ".\n";
+            exit;
         }
 
-        for (int i = 0; i < num_files; ++i)
-            run_test(id, i, out);
+        for (int event_id = event_from - 1; event_id < event_to; ++event_id)
+            run_test(graph_id, event_id, out);
     }
 }
 
@@ -120,9 +140,17 @@ int main() {
     ios::sync_with_stdio(false);
     srand(time(nullptr));
 
-    int from, to, num_files;
-    prompt_user_input(from, to, num_files);
-    run_all_tests(from, to, num_files);
+    string repeat;
+    const unordered_set<string> yes_answers = {"y", "Y", "yes", "Yes"};
 
+    int graph_from, graph_to, event_from, event_to;
+    do {
+        prompt_user_input(graph_from, graph_to, event_from, event_to);
+        run_all_tests(graph_from, graph_to, event_from, event_to);
+        cout << "Do you want another one? (y/n): ";
+        cin >> repeat;
+        cout << endl;
+    } while (yes_answers.count(repeat));
+    
     return 0;
 }
