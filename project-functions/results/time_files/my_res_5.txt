@@ -1,0 +1,5 @@
+6382: 0.502s. Wrong Output!
+9382: 0.833s. Wrong Output!
+12382: 1.381s. Wrong Output!
+15382: 1.714s. Wrong Output!
+18382: 2.292s. Wrong Output!

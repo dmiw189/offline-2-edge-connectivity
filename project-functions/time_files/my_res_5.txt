@@ -1,5 +1,0 @@
-3000: 6.797sec, Wrong Output!
-6000: 17.142sec, Wrong Output!
-9000: 27.774sec, Wrong Output!
-12000: 41.287sec, Wrong Output!
-15000: 53.795sec, Wrong Output!

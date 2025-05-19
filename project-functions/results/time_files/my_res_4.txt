@@ -1,0 +1,5 @@
+2147: 0.066s. Wrong Output!
+3147: 0.123s. Wrong Output!
+4147: 0.153s. Wrong Output!
+5147: 0.248s. Wrong Output!
+6147: 0.324s. Wrong Output!
