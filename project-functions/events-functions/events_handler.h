@@ -26,7 +26,7 @@ class EventsHandler {
         vector<ll> right_active_list;
 
         //is_left: we are searching for static edges at the left part of the events
-        void findStaticEdges(cll start, cll end, const bool is_left) {
+        void findStaticEdges(cll start, cll end, cb is_left) {
             ll mid = (start + end + 1) / 2;
             ll from = is_left ? mid : start;
             ll to = is_left ? end : mid - 1;
@@ -43,7 +43,7 @@ class EventsHandler {
             // printStaticEdges(is_left);
         }
 
-        void findActiveNodes(cll start, cll end, const bool is_left) {
+        void findActiveNodes(cll start, cll end, cb is_left) {
             auto& active = is_left ? left_active : right_active;
             auto& list = is_left ? left_active_list : right_active_list;
 
@@ -59,14 +59,15 @@ class EventsHandler {
         }
 
         bool hasQueryInRange(cll start, cll end) const {
-            for (ll i = start; i <= end; ++i)
-                if (get<0>(eventsList[i]) == 'Q') return true;
+            for (auto i = start; i <= end; i++)
+                if (get<0>(eventsList[i]) == 'Q') 
+                    return true;
             return false;
         }
 
         void clear() {
-            for (ll u : left_active_list) left_active[u] = false;
-            for (ll u : right_active_list) right_active[u] = false;
+            for (auto u : left_active_list) left_active[u] = false;
+            for (auto u : right_active_list) right_active[u] = false;
             left_active_list.clear();
             right_active_list.clear();
             static_left_edges.clear();
@@ -78,7 +79,7 @@ class EventsHandler {
         vector<bool> left_active;
         vector<bool> right_active;
 
-        void printStaticEdges(bool is_left) {
+        void printStaticEdges(cb is_left) {
             auto& edges = is_left ? static_left_edges : static_right_edges;
             const char* side = is_left ? "Left" : "Right";
             

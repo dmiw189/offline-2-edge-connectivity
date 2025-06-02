@@ -76,7 +76,7 @@ ofstream open_event_file(const string& eventFile) {
 }
 
 ll calculate_num_events(const ll numNodes, const int fileIdx) {
-    return numNodes * (fileIdx + 1);
+    return fileIdx  <= 18 ? numNodes * (fileIdx + 1) : numNodes * 2;
 }
 
 void write_event_header(ofstream& outfile, ll numEvents) {
@@ -116,23 +116,18 @@ void write_events_to_file(ofstream& outfile, const vector<tuple<char, ll, ll>>& 
 void generate_events_for_file(const string graphID, const ll numNodes, const int fileIdx, 
     const int numEventFiles, unordered_set<pair<ll, ll>, hashFunction>& edges) {
 
-    vector<tuple<char, ll, ll>> events;
-
     string eventsFolder = "../events";
     string eventFile = eventsFolder + "/event_" + graphID + "." + to_string(fileIdx) + ".txt";
-
     create_events_directory(eventsFolder);
-
     ofstream outfile = open_event_file(eventFile);
     if (!outfile.is_open()) return;
 
     ll numEvents = calculate_num_events(numNodes, fileIdx);
     write_event_header(outfile, numEvents);
-
     cout << "Generated event_" << graphID << "." + to_string(fileIdx) + " with " << numEvents << " events" << endl << flush;
 
     ll eventCount = 0;
-
+    vector<tuple<char, ll, ll>> events;
     while (eventCount < numEvents) {
         generate_event(numNodes, edges, events);
         log_progress(events.size(), numEvents);
@@ -176,9 +171,12 @@ int main() {
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 
-    for (auto i = from; i <= to; i++) {
-        generate_events_with_dense_queries(to_string(i), numEventFiles);
+    for (auto graph_id = from; graph_id <= to; graph_id++) {
+        generate_events_with_dense_queries(to_string(graph_id), numEventFiles);
     }
+
+    generate_events_with_dense_queries(to_string(256), numEventFiles);
+    generate_events_with_dense_queries(to_string(257), numEventFiles);
 
     return 0;
 }

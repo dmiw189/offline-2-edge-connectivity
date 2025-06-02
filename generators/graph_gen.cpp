@@ -29,7 +29,7 @@ ll generateVertices(int z) {
         80000, 100000, 300000, 600000, 1000000,
         5000000, 10000000, 40000000, 90000000, 130000000
     };
-    return vertices[max(0, min(18, z))];
+    return z < 18 ? vertices[max(0, min(18, z))] : 6;
 }
 
 // Generate a high-density number of edges
@@ -37,7 +37,7 @@ ll generateHighDensityEdges(const ll V, const int T, const int z) {
    ll numEdges;
    do {
        // The number of edges is between 0 and V * 2 * T + (1LL << z) + 2 + 2 * T, ensuring high density
-       numEdges = randomInt(0, V * 2 * T + (1LL << z) + 2 + 2 * T);
+       numEdges = randomInt(0, V * 2 * T + (1LL << abs(z)) + 2 + 2 * T);
    } while (numEdges < V || numEdges >= V * V / 2);  // Ensure numEdges is within a valid range
    return numEdges;
 }
@@ -48,7 +48,7 @@ ll generateLowDensityEdges(const ll V) {
 }
 
 ll generateEdges(const ll V, const int T, const int z) {
-   return T == 1 ? generateLowDensityEdges(V) : generateHighDensityEdges(V, T, z);
+   return T == 1 ? generateHighDensityEdges(V, T, z) : generateLowDensityEdges(V);
 }
 
 unordered_set<pair<ll, ll>, pair_hash> generateUniqueEdges(ll V, ll M) {
@@ -84,14 +84,12 @@ void writeGraph(ofstream& outfile, int T, ll V, const unordered_set<pair<ll, ll>
 void generateGraphFile(int z) {
     string graphsFolder = "../graphs";
     string outputPath = graphsFolder + "/graph_" + to_string(z) + ".txt";
-
     if (!fs::exists(graphsFolder)) {
         if (!fs::create_directories(graphsFolder)) {
             cerr << "Error: Unable to create directory " << graphsFolder << '\n';
             return;
         }
     }
-
     ofstream outfile(outputPath);
     if (!outfile.is_open()) {
         cerr << "Error: Unable to open file " << outputPath << '\n';
@@ -126,6 +124,9 @@ int main() {
     for (int z = from; z <= to; ++z) {
         generateGraphFile(z);
     }
+
+    generateGraphFile(256);
+    generateGraphFile(257);
 
     return 0;
 }

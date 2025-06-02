@@ -5,29 +5,29 @@ using namespace std;
 using ll = long long;
 using cll = const long long;
 
-void insert_edge(cll u, cll v, vector<vector<ll>> &total_neighbours) {
-  total_neighbours[u].push_back(v);
-  total_neighbours[v].push_back(u);
+void insert_edge(cll u, cll v, vector<vector<ll>>& graph) {
+  graph[u].push_back(v);
+  graph[v].push_back(u);
 }
 
-void insert_edge_enhanced(cll u, cll v, vector<vector<tuple<ll, ll, bool>>> &adj) {
-  const auto size_u = adj[u].size();
-  const auto size_v = adj[v].size();
-  adj[u].emplace_back(v, size_v, false);
-  adj[v].emplace_back(u, size_u, false);
+void insert_edge(cll u, cll v, vector<vector<tuple<ll, ll, bool>>>& graph) {
+  const auto size_u = graph[u].size();
+  const auto size_v = graph[v].size();
+  graph[u].emplace_back(v, size_v, false);
+  graph[v].emplace_back(u, size_u, false);
 }
 
-void add_edges_to_graph(const vector<pair<ll, ll>> &edges, vector<vector<tuple<ll, ll, bool>>> &adj) {
-	for (const auto [u, v] : edges)
-    insert_edge_enhanced(u, v, adj);
+void add_edges_to_graph(const vector<pair<ll, ll>>& edges, vector<vector<tuple<ll, ll, bool>>>& graph) {
+  for (const auto& [u, v] : edges)
+    insert_edge(u, v, graph);
 }
 
-void remove_edge(cll u, cll v, vector<vector<ll>> &total_neighbours) {
-  auto it = find(total_neighbours[u].begin(), total_neighbours[u].end(), v);
-  if (it != total_neighbours[u].end())
-    total_neighbours[u].erase(it);
+void remove_edge(cll u, cll v, vector<vector<ll>>& graph) {
+  auto it = find(graph[u].begin(), graph[u].end(), v);
+  if (it != graph[u].end())
+    graph[u].erase(it);
   
-  it = find(total_neighbours[v].begin(), total_neighbours[v].end(), u);
-  if (it != total_neighbours[v].end())
-    total_neighbours[v].erase(it);
+  it = find(graph[v].begin(), graph[v].end(), u);
+  if (it != graph[v].end())
+    graph[v].erase(it);
 }

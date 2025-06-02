@@ -13,6 +13,27 @@ class Logs_and_Printers {
             cout << "---------- End of printing Eventslist --------------" << endl;
         }
 
+
+        static void print_components(c_str label, const unordered_map<ll, ll>& components_map) {
+            cout << "-----------------Start of " << label << "-------------------------\n";
+            unordered_map<ll, vector<ll>> grouped;
+
+            // Group vertices by component ID
+            for (const auto& [vertex, component_id] : components_map) {
+                grouped[component_id].push_back(vertex);
+            }
+
+            // Print each component group
+            for (const auto& [comp_id, vertices] : grouped) {
+                cout << "[" << comp_id << ": ";
+                for (const auto& v : vertices)
+                    cout << v << ", ";
+                cout << "]" << endl;
+            }
+            cout << "---------------End of " << label << "---------------------\n";
+        }
+
+
         static void log_memory_usage(const std::string& name, size_t bytes) {
             cout << "[Memory] " << name << ": " << bytes << " bytes (" 
                 << bytes/1024 << " KB, " << bytes/(1024*1024) << " MB)\n";

@@ -13,171 +13,216 @@ using List = vector<ll>;
 using cList = const vector<ll>;
 using AugmentedEventsList = vector<tuple<char, ll, ll, ll>>;
 
+class Graph {
+	public: 
+		Graph(c_str z): total_vertices(read_total_vertices(z)), graph(total_vertices), components_map_ptr(nullptr) {}
+
+		Graph(cll total_vertices, const vector<vector<tuple<ll, ll, bool>>>& graph, const unordered_map<ll, ll>* map_ref)
+			: total_vertices(total_vertices), graph(graph), components_map_ptr(map_ref) {}
+
+		Graph(cll total_vertices, const vector<vector<tuple<ll, ll, bool>>>& graph)
+			: Graph(total_vertices, graph, nullptr) {}
+
+
+		cll get_total_vertices() const {
+			return total_vertices;
+		}
+
+		const vector<vector<tuple<ll, ll, bool>>>& get_graph() const {
+			return graph;
+		}
+
+		const unordered_map<ll, ll>& get_components_map() const {
+			if (components_map_ptr == nullptr) {
+				throw runtime_error("component is null!");
+			}
+			return *components_map_ptr;
+		}
+
+		void set_components_map(const unordered_map<ll, ll>& map_ref) {
+        	components_map_ptr = &map_ref;
+    	}
+
+		void clear() {
+			total_vertices = 0;
+			graph.clear();
+			components_map_ptr = nullptr;
+		}
+
+	private:
+		ll total_vertices; 
+		vector<vector<tuple<ll, ll, bool>>> graph;
+		const unordered_map<ll, ll>* components_map_ptr;
+};
+
 class Graph_Details {  
 
-  public:           
-	string z;  
-	const unordered_map<ll, ll>* umap_ptr;
-	
-	ll total_vertices; 
-	vector<vector<ll>> total_neighbours; 
-	vector<vector<tuple<ll, ll, bool>>> enhanced_total_neighbours;
-	
-	vector<ll> bridge_tree_map; 
-	unordered_set<pair<ll, ll>, hashFunction> total_bridges; 
-	vector<pair<ll, ll>> bridge_edges; 
-	vector<vector<ll>> total_bridge_neighbours;
-	
-	vector <ll> total_bridge_degree;
-	queue<ll> leaves;
-	vector<bool> bridge_active_nodes;
-	vector <bool> removed;
-	ll total_bridge_vertices = 0;
-	
-    Graph_Details(string temp_z): total_vertices(read_total_vertices(temp_z)), total_neighbours(total_vertices), enhanced_total_neighbours(total_vertices), 
-			umap_ptr(nullptr){
-	  z= temp_z;
-    }
-	
-	Graph_Details (ll temp_total_vertices, vector<vector<ll>>  temp_total_neighbours): umap_ptr(nullptr) {
-		total_vertices= temp_total_vertices;
-		total_neighbours= temp_total_neighbours;
-	}
-	
-	Graph_Details& operator=(const Graph_Details& other) {
-        if (this != &other) {
-            total_vertices= other.total_vertices; 
-			z= other.z;
-			enhanced_total_neighbours = other.enhanced_total_neighbours;
-        }
-        return *this;
-    }
-	
-	void set_umap(const unordered_map<ll, ll> &that_umap) {
-		umap_ptr = &that_umap;
+  public:           	
+	Graph_Details(cll total_vertices, const vector<vector<tuple<ll, ll, bool>>>& graph) {
+		this->total_vertices = total_vertices;
+		this->graph = graph;
+		this->total_bridge_vertices = 0;
 	}
 
-	const unordered_map<ll, ll>& get_umap() const {
-		if (umap_ptr == nullptr) {
-			throw runtime_error("component is null!");
-		}
-		return *umap_ptr;
+	cll get_total_vertices() const {
+		return total_vertices;
+	}
+
+	vector<vector<tuple<ll, ll, bool>>>& get_graph() {
+		return graph;
+	}
+
+	void set_total_vertices(cll total_vertices) {
+		this->total_vertices = total_vertices;
+	}
+
+	void set_graph(const vector<vector<tuple<ll, ll, bool>>>& graph) {
+		this->graph = move(graph);
+	}
+
+	void set_graph(cll total_vertices) {
+		this->total_vertices = total_vertices;
+		this->graph = vector<vector<tuple<ll, ll, bool>>> (total_vertices);;
 	}
 	
-	void clear(){
-		// total_bridges.clear();                   
-		bridge_edges.clear();                   
-		bridge_tree_map.clear();
-		total_bridge_neighbours.clear();         
-		total_bridge_degree.clear(); 
-		leaves = queue<ll>();                          
-		bridge_active_nodes.clear();             
-		removed.clear();                         
-		total_bridge_vertices = 0;  
-		umap_ptr = nullptr;           
+	void add_edge(cll u, cll v) {
+		insert_edge(u, v, graph);
 	}
 
-	void construct_bridges(const vector<bool> active_component_nodes){
-		
-		// print_enhanced_graph("before bridge construction");
-		// test_print_components("before bridge construction");
-		
-		find_bridges(total_vertices, enhanced_total_neighbours, bridge_edges);
-
-		// print_edges();
-		find_bridge_tree(total_vertices, enhanced_total_neighbours, bridge_tree_map);
-		
-		total_bridge_vertices= *max_element(bridge_tree_map.begin(), bridge_tree_map.end())+1;
-		
-		// insert data in the temp_bridge_neighbours
-		vector<vector<ll>> temp_bridge_neighbours(total_bridge_vertices);
-		ll first, second;
-		for (auto u : bridge_edges){
-			first = bridge_tree_map[u.first];
-			second = bridge_tree_map[u.second];  
-			if (first != second){
-				temp_bridge_neighbours[first].push_back(second);
-				temp_bridge_neighbours[second].push_back(first);
-			}				
-		}
-		
-		ll s= 0;
-		for (auto u : temp_bridge_neighbours){
-			total_bridge_neighbours.push_back(u);
-			total_bridge_degree.push_back(total_bridge_neighbours[s].size());
-			if (u.size() == 1){
-				leaves.push(s);
-			}
-			s++;
-		}
-		
-		bridge_active_nodes.assign(total_bridge_vertices, false);
-		for (int i = 0; i < total_vertices; i++) {
-			if (active_component_nodes[i]) {
-				bridge_active_nodes[bridge_tree_map[i]] = true;
-			}
-		}
-		
-		// test_print_graph(total_bridge_neighbours, "after bridge tree construction");
-		// test_print_bridge_tree_map("before pruning");
+	void add_edges(const vector<pair<ll, ll>>& edges) {
+		add_edges_to_graph(edges, graph);
 	}
 
-	
-	void test_print_components(c_str z) {
-		cout << "-------components(" << z << ")-------" << endl;
-		try {
-			if (umap_ptr == nullptr) {
-				throw runtime_error("Component pointer is null.");
-			}
-			for (size_t i = 0; i < umap_ptr->size(); i++) {
-				cout << i << ": " << (*umap_ptr).at(i) << endl;
-			}
-			cout << "--------------" << endl;
-		} catch (const exception& e) {
-			cerr << "Exception caught: " << e.what() << endl;
-		} catch (...) {
-			cerr << "An unknown error occurred in test_print_components." << endl;
-		}
+	cll get_total_bridge_vertices() const {
+		return total_bridge_vertices;
+	}
+
+	const vector<ll> get_bridge_map()& {
+		return bridge_map;
+	}
+
+	vector<ll> get_bridge_graph(cll v)& {
+		return bridge_graph[v];
+	}
+
+	void clear_bridge_graph(cll v) {
+		bridge_graph[v].clear();
+	}
+
+	void add_edge_at_bridge_graph(cll u, cll v) {
+		insert_edge(u, v, bridge_graph);
+	}
+
+
+	cb get_bridge_active_node(cll v) const {
+		return bridge_active_nodes[v];
+	}
+
+	cll get_bridge_tree_degree(cll v) const {
+		return bridge_tree_degrees[v];
+	}
+
+	void set_bridge_tree_degree(cll v, cll value) {
+		bridge_tree_degrees[v] = value;
 	}
 	
-	void test_print_bridge_tree_map(c_str z) {
-		cout << "-------bridge tree map - " << z << ".-------" << endl;
-		for (auto i = 0; i < bridge_tree_map.size(); i++) {
-			cout << i << ": " << bridge_tree_map[i] << endl;
-		}
-		cout << "--------------" << endl;
+	const queue<ll> get_leaves()& {
+		return leaves;
 	}
 
-	void print_enhanced_graph(c_str z){
-		cout << "-------Graph - " << z << ".-------" << endl;
-		for (auto i = 0; i < enhanced_total_neighbours.size(); i++){
+	void construct_bridges(const vector<bool>& active_component_nodes) {	
+		vector<pair<ll, ll>> bridge_edges; 
+		mark_bridge_edges(total_vertices, graph, bridge_edges);
+		calculate_bridge_map(total_vertices, graph, bridge_map);
+		process_before_pruning(bridge_edges, active_component_nodes);
+		// print_debug_info(bridge_edges);
+	}
+
+	void print_graph(c_str text) {
+		cout << "-------Graph - " << text << ".-------" << endl;
+		for (auto i = 0; i < graph.size(); i++){
 			cout << i << ": ";
-			for (const auto u : enhanced_total_neighbours[i]) {
+			for (const auto u : graph[i]) 
 				cout << get<0>(u) << " ";
-			}
 			cout << endl;		  
 		  }
 		cout << "-----------" << endl;
 	}
 
-	void test_print_graph(vector<vector<ll>> adj, c_str z){
-		cout << "-------Graph - " << z << ".-------" << endl;
-		for (auto i = 0; i < adj.size(); i++){
-			cout << i << ": ";
-			for (const auto u : adj[i]) {
-				cout << u << " ";
-			}
-			cout << endl;		  
-		  }
-		cout << "-----------" << endl;
+	void clear() {
+		total_vertices = 0;
+		graph.clear();
+		bridge_map.clear();
+		bridge_graph.clear();
+		total_bridge_vertices = 0;
+		bridge_active_nodes.clear();
+		bridge_tree_degrees.clear();
+		leaves = queue<ll>();
 	}
 
-	void print_edges() {
-		cout << "--------Bridge Edges -------\n";
-		for (const auto e : bridge_edges) {
-			cout << "(" << e.first << ", " << e.second << ")" << endl; 
+	private:
+		ll total_vertices; 
+		vector<vector<tuple<ll, ll, bool>>> graph;
+
+		vector<ll> bridge_map; 
+		vector<vector<ll>> bridge_graph;
+		ll total_bridge_vertices;
+		vector<bool> bridge_active_nodes;
+
+		vector <ll> bridge_tree_degrees;
+		queue<ll> leaves;
+
+		void process_before_pruning(const vector<pair<ll, ll>>& bridge_edges, const vector<bool>& active_component_nodes) {
+			total_bridge_vertices = *max_element(bridge_map.begin(), bridge_map.end()) + 1;
+			//create bridge graph
+			bridge_graph = vector<vector<ll>> (total_bridge_vertices);
+			for (const auto& [u, v] : bridge_edges) {
+				auto c_u = bridge_map[u];
+				auto c_v = bridge_map[v];  
+				if (c_u != c_v) 
+					insert_edge(c_u, c_v, bridge_graph);
+			}
+			//create degrees and leaves
+			for (auto v = 0; v < bridge_graph.size(); v++) {
+				cll degree = bridge_graph[v].size();			
+				bridge_tree_degrees.push_back(degree);
+				if (degree == 1) 
+					leaves.push(v);
+			}
+
+			//create bridge vertices activity
+			bridge_active_nodes.assign(total_bridge_vertices, false);
+			for (auto v = 0; v < total_vertices; v++) 
+				if (active_component_nodes[v]) 
+					bridge_active_nodes[bridge_map[v]] = true;		
 		}
-		cout << "------------------------\n";
-	}
-	
+
+		void print_debug_info(const vector<pair<ll, ll>>& bridge_edges) const {
+			cout << "--------------Construct Bridges----------------------\n";
+			cout << "-------Graph - before bridge construction------------\n";
+			for (auto i = 0; i < graph.size(); i++){
+				cout << i << ": ";
+				for (const auto u : graph[i]) 
+					cout << get<0>(u) << " ";
+				cout << endl;		  
+			}
+			cout << "-----------------------------------------------------\n";
+
+			cout << "-----------------Bridge Edges------------------------\n";
+			for (const auto& [u, v] : bridge_edges)
+				cout << "(" << u << ", " << v << ")\n";
+			cout << "-----------------------------------------------------\n";
+			cout << "-----------------Bridge Graph------------------------\n";
+			for (ll i = 0; i < bridge_graph.size(); ++i) {
+				cout << i << ": ";
+				for (ll u : bridge_graph[i]) cout << u << " ";
+				cout << "\n";
+			}
+			cout << "-----------------------------------------------------\n";
+			cout << "------------------Bridge Map-------------------------\n";
+			for (ll i = 0; i < bridge_map.size(); ++i)
+				cout << i << ": " << bridge_map[i] << "\n";
+			cout << "-----------------------------------------------------\n";
+		}
+
 };

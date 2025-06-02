@@ -13,9 +13,9 @@ using cList = const vector<ll>;
 using AugmentedEventsList = vector<tuple<char, ll, ll, ll>>;
 
 inline bool allMeasuremTime;
+inline chrono::nanoseconds time_bridges{0}, time_pruning{0}, time_rec{0};
 inline chrono::time_point<std::chrono::high_resolution_clock> rec_start_t = chrono::high_resolution_clock::now();
 inline chrono::time_point<std::chrono::high_resolution_clock> rec_end_t = chrono::high_resolution_clock::now();
-
 
 inline AugmentedEventsList eventsList;
 inline EventsHandler ev_handler;
@@ -81,11 +81,13 @@ bool validate_results(c_str graph_id, c_str event_id, const vector<bool>& result
 // ─────────────────────────────────────────────────────────────
 // Timing Measurement
 // ─────────────────────────────────────────────────────────────
-ll compute_and_time(Graph_Details& graph_details, vector<bool>& results, const unordered_map<ll, ll>& components_map) {
+ll compute_and_time(Graph& graph, vector<bool>& results, const unordered_map<ll, ll>& components_map) {
     auto start = chrono::high_resolution_clock::now();
     rec_start_t = chrono::high_resolution_clock::now();
     MEM_START();
-    compute_2_edge_connectivity(graph_details, 0, eventsList.size() - 1, results, components_map);
+
+    ll ev_start = 0, ev_end = eventsList.size() - 1;
+    compute_2_edge_connectivity(ev_start, ev_end, graph, results, components_map);
     if (allMeasuremTime) MEM_REPORT();
     auto end = chrono::high_resolution_clock::now();
     return chrono::duration_cast<chrono::milliseconds>(end - start).count();
@@ -95,19 +97,12 @@ ll compute_and_time(Graph_Details& graph_details, vector<bool>& results, const u
 // Duration Printer
 // ─────────────────────────────────────────────────────────────
 void print_all_timers() {
-    Logs_and_Printers::print_duration(time_query_exists, "Query Exists");
-    Logs_and_Printers::print_duration(time_clear_events, "Clear Events");
-    Logs_and_Printers::print_duration(time_set_up_graph, "Set Up Graph");
-    Logs_and_Printers::print_duration(time_active_nodes, "Active Nodes");
-    Logs_and_Printers::print_duration(time_active_component_nodes, "Active Component Nodes");
-    Logs_and_Printers::print_duration(time_static_edges, "Static Edges");
-    Logs_and_Printers::print_duration(time_static_component_edges, "Static Component Edges");
-    Logs_and_Printers::print_duration(time_add_edges, "Add Edges");
     Logs_and_Printers::print_duration(time_bridges, "Bridges");
     Logs_and_Printers::print_duration(time_pruning, "pruning_utils");
-    Logs_and_Printers::print_duration(time_clear_graph, "Clear Graph");
     Logs_and_Printers::print_duration(time_rec, "Recursion Time");
-    clear_time_measurements();
+    cout << "-----------------------------------------------------" << endl;
+    cout << "-----------------------------------------------------" << endl;
+    time_bridges = time_pruning = time_rec = chrono::nanoseconds{0};
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -141,15 +136,17 @@ void initialize_events_list(c_str graph_id, c_str event_id) {
 void run_test(c_str graph_id, c_str event_id, ofstream& time_output) {
     cout << "Input events ID = " + graph_id + "." + event_id << endl;
     
-    Graph_Details graphDetails(graph_id);
+    Graph graph(graph_id);
+    cll total_vertices = graph.get_total_vertices();
+    const unordered_map<ll, ll> components_map = create_identity_map(total_vertices);
+    // graph.set_components_map(components_map);
 
     initialize_events_list(graph_id, event_id);
-    ev_handler = EventsHandler(graphDetails.total_vertices);
+    ev_handler = EventsHandler(total_vertices);
 
     vector<bool> results;
-    const unordered_map<ll, ll> components_map = create_identity_map(graphDetails.total_vertices);
 
-    ll elapsed_time = compute_and_time(graphDetails, results, components_map);
+    ll elapsed_time = compute_and_time(graph, results, components_map);
     
     double elapsed_time_in_seconds = static_cast<double>(elapsed_time) / 1000.0;
     cout << "Total Time: " << elapsed_time_in_seconds << "s\n";
@@ -207,6 +204,8 @@ int main() {
         cin >> repeat;
         cout << endl;
     } while (yes_answers.count(repeat));
+
+    run_all_tests(256, 257, 0, 4);
     
     return 0;
 }

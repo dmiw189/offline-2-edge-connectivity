@@ -1,0 +1,5 @@
+21: 0.001s. Correct Output!
+27: 0.003s. Correct Output!
+33: 0.001s. Correct Output!
+39: 0.003s. Correct Output!
+45: 0.001s. Correct Output!

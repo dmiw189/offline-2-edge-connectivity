@@ -44,34 +44,33 @@ namespace MemoryTracker {
         public:
             template<typename... Args>
             static void log(const string& context, const Args&... args) {
-                const vector<string> arg_labels = {"graph_details", "components_map"};
+                const vector<string> arg_labels = {"graph"};
                 size_t i = 0;
                 ((stats[context][arg_labels[i++]].update(estimate_memory(args))), ...);
             }
             
             static void print_report() {
+                cout << endl;
                 cout << "-------------------------------------------------" << endl;
-                cout << "-------------------------------------------------" << endl;
-                cout << "=== Per-Argument Memory Analysis (All values in MB) ===\n";
+                cout << "-------------Memory Analysis(MB)-----------------" << endl;
+                const int precision = 15;
                 for (const auto& [ctx, arg_data] : stats) {
                     cout << "\nContext: " << ctx << " Memory Usage:\n";
                     cout << "---------------------------------------------\n";
-                    cout << left << setw(20) << "Argument" 
-                        << setw(20) << "Total" 
-                        << setw(20) << "Avg" 
-                        << setw(20) << "Max" << "\n";
+                    cout << left << setw(precision) << "Argument" 
+                        << setw(precision) << "Total" 
+                        << setw(precision) << "Avg" 
+                        << setw(precision) << "Max" << "\n";
                     
                     for (const auto& [arg_name, data] : arg_data) {
-                        cout << setw(20) << arg_name 
-                            << setw(20) << fixed << setprecision(3) << bytes_to_mb(data.total)
-                            << setw(20) << bytes_to_mb(data.count ? data.total/data.count : 0)
-                            << setw(20) << bytes_to_mb(data.max) << "\n";
+                        cout << setw(precision) << arg_name 
+                            << setw(precision) << fixed << setprecision(3) << bytes_to_mb(data.total)
+                            << setw(precision) << bytes_to_mb(data.count ? data.total/data.count : 0)
+                            << setw(precision) << bytes_to_mb(data.max) << "\n";
                     }
                 }
-                cout << "---------------------------------------------\n";
-                cout << "(1 MB = 1024 KB = 1048576 bytes)\n";
                 cout << "-------------------------------------------------" << endl;
-                cout << "-------------------------------------------------" << endl;
+                cout << endl;
             }
             
             static void reset() {

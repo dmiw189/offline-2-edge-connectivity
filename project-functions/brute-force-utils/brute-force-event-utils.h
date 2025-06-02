@@ -17,19 +17,18 @@ class Event {
 		}
 
 		// Getters
-		ll get_total_vertices() const { return total_vertices; }
-		ll get_total_edges() const { return total_edges; }
-		ll get_total_events() const { return total_events; }
+		cll get_total_vertices() const { return total_vertices; }
+		cll get_total_edges() const { return total_edges; }
+		cll get_total_events() const { return total_events; }
 		const vector<tuple<char, ll, ll>>& get_eventsList() const { return eventsList; }
 		// Setters
-		void set_total_vertices(ll value) { total_vertices = value; }
-		void set_total_edges(ll value) { total_edges = value; }
-		void set_total_events(ll value) { total_events = value; }
+		void set_total_vertices(cll value) { total_vertices = value; }
+		void set_total_edges(cll value) { total_edges = value; }
+		void set_total_events(cll value) { total_events = value; }
 		void set_eventsList(const vector<tuple<char, ll, ll>>& list) { eventsList = list; }
 
 
 	private: 
-
 		ll total_vertices, total_edges, total_events;
 		vector<tuple<char, ll, ll>> eventsList;
 
@@ -42,9 +41,8 @@ class Event {
 				infile >> total_vertices >> total_edges;
 				this->total_vertices = total_vertices;
 				this->total_edges = total_edges;
-				while ((infile >> v1 >> v2)) {	  
+				while ((infile >> v1 >> v2)) 
 					eventsList.push_back(make_tuple('I', v1, v2));
-				}
 				infile.close();
 			}
 		}
