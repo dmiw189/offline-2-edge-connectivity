@@ -25,23 +25,25 @@ class EventsHandler {
         vector<ll> left_active_list;
         vector<ll> right_active_list;
 
-        //is_left: we are searching for static edges at the left part of the events
+        // Finds static edges on either the left or right side of the event range
         void findStaticEdges(cll start, cll end, cb is_left) {
-            ll mid = (start + end + 1) / 2;
-            ll from = is_left ? mid : start;
-            ll to = is_left ? end : mid - 1;
+            auto mid = (start + end) / 2;
+            auto from = is_left ? mid + 1 : start;
+            auto to   = is_left ? end     : mid;
             auto& edge_store = is_left ? static_left_edges : static_right_edges;
 
-            for (ll i = from; i <= to; i++) {
+            for (auto i = from; i <= to; i++) {
                 const auto& [type, x, y, ref] = eventsList[i];
-                const bool isStatic = (is_left && type == 'D' && (ref == -1 || ref < from)) 
-                                || (!is_left && type == 'I' && (ref == -1 || ref > to));
-                if (isStatic) 
-                    edge_store.emplace_back(x, y);
-            }
 
+                // A 'D' with no valid ref on the left or an 'I' with no valid ref on the right is static
+                if ((is_left && type == 'D' && (ref == -1 || ref < start))  
+                || (!is_left && type == 'I' && (ref == -1 || ref > end))) {
+                    edge_store.emplace_back(x, y);
+                }
+            }
             // printStaticEdges(is_left);
         }
+
 
         void findActiveNodes(cll start, cll end, cb is_left) {
             auto& active = is_left ? left_active : right_active;

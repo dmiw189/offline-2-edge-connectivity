@@ -37,7 +37,7 @@ ll generateHighDensityEdges(const ll V, const int T, const int z) {
    ll numEdges;
    do {
        // The number of edges is between 0 and V * 2 * T + (1LL << z) + 2 + 2 * T, ensuring high density
-       numEdges = randomInt(0, V * 2 * T + (1LL << abs(z)) + 2 + 2 * T);
+       numEdges = randomInt(V, V * 2 * T + (1LL << abs(z)) + 2 + 2 * T);
    } while (numEdges < V || numEdges >= V * V / 2);  // Ensure numEdges is within a valid range
    return numEdges;
 }

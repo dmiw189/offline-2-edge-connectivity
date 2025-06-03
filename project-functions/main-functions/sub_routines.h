@@ -39,8 +39,6 @@ class Sub_Routines {
             vector<bool> active_component_nodes(g_details.get_total_vertices(), false);
             vector<pair<ll, ll>> static_component_edges;
             // cout << "We are at: [" << start << ", " << end << "] - processing" << endl;
-            // Logs_and_Printers::test_print_eventsList(start, end);
-
             ev_handler.findActiveNodes(start, end, is_left);
             Sub_Routines::compute_active_component_nodes(active_nodes, active_component_nodes, old_components_map);
             ev_handler.findStaticEdges(ev_start, ev_end, is_left);

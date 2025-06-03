@@ -10,13 +10,6 @@ using AugmentedEventsList = vector<tuple<char, ll, ll, ll>>;
 extern AugmentedEventsList eventsList;
 extern EventsHandler ev_handler;
 
-extern bool allMeasuremTime;
-extern chrono::time_point<std::chrono::high_resolution_clock> rec_start_t;
-extern chrono::time_point<std::chrono::high_resolution_clock> rec_end_t;
-extern chrono::nanoseconds time_bridges, time_pruning, time_rec;
-
-#define MEASURE(t, block) measure_time(t, [&]{ block; })
-
 void compute_2_edge_connectivity(ll ev_start, ll ev_end, Graph& graph, vector<bool>& results, const unordered_map<ll, ll>& old_components_map);
 
 void process_range(cll l, cll r, cll ev_start, cll ev_end, cb is_left, const Graph& graph, const unordered_map<ll, ll>& old_components_map, vector<bool>& results) {
@@ -31,17 +24,11 @@ void process_range(cll l, cll r, cll ev_start, cll ev_end, cb is_left, const Gra
     // details.print_graph("Pruned Graph)");
     Graph identical_graph(details.get_total_vertices(), details.get_graph());
     details.clear();
-    rec_start_t = chrono::high_resolution_clock::now();
     compute_2_edge_connectivity(l, r, identical_graph, results, new_components_map);
 }
 
 void compute_2_edge_connectivity(cll ev_start, cll ev_end, Graph& graph, vector<bool>& results, const unordered_map<ll, ll>& old_components_map) {
-    rec_end_t = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::nanoseconds>(rec_end_t - rec_start_t);
-    time_rec += duration;
-    MEM_LOG("recursion", graph);
     // cout << "We are at: [" << ev_start << ", " << ev_end << "] - recursion" << endl;
-
     if (ev_start == ev_end) {
         Sub_Routines::process_single_event(eventsList[ev_start], results, old_components_map);
         return;

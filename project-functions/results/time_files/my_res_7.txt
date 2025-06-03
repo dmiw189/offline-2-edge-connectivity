@@ -1,0 +1,5 @@
+20482: 0.468s. Correct Output!
+30482: 0.836s. Correct Output!
+40482: 1.195s. Correct Output!
+50482: 1.579s. Correct Output!
+60482: 1.956s. Correct Output!

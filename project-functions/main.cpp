@@ -13,7 +13,6 @@ using cList = const vector<ll>;
 using AugmentedEventsList = vector<tuple<char, ll, ll, ll>>;
 
 inline bool allMeasuremTime;
-inline chrono::nanoseconds time_bridges{0}, time_pruning{0}, time_rec{0};
 inline chrono::time_point<std::chrono::high_resolution_clock> rec_start_t = chrono::high_resolution_clock::now();
 inline chrono::time_point<std::chrono::high_resolution_clock> rec_end_t = chrono::high_resolution_clock::now();
 
@@ -55,10 +54,10 @@ unordered_map<ll, ll> create_identity_map(const ll total_vertices) {
 // Output Validation
 // ─────────────────────────────────────────────────────────────
 bool validate_results(c_str graph_id, c_str event_id, const vector<bool>& results) {
-    string id = graph_id + "." + event_id;
+    auto id = graph_id + "." + event_id;
     auto file_name = "results/output_files/output_file_" + id + ".txt";
     vector<bool> expected = read_results_from_file(file_name);
-    bool correct = expected == results;
+    auto correct = expected == results;
     
     ofstream out("results/output_files/my_output_" + id + ".txt");
     if (!out) {
@@ -66,15 +65,14 @@ bool validate_results(c_str graph_id, c_str event_id, const vector<bool>& result
         exit;
     }
 
-    if (correct) {
-        out << "Correct Answers" <<  endl;
-    } else {
+    if (correct) out << "Correct Answers" <<  endl;
+    else {
         out << "Wrong Answers" << endl << "Expected -> Result" << endl;
         for (auto i = 0; i < results.size(); i++) 
             out << expected[i] << "->" << results[i] << (results[i] != expected[i] ? "!!!" : "") << endl;
     }
     out << endl;
-
+    out.close();
     return correct;
 }
 
@@ -82,41 +80,20 @@ bool validate_results(c_str graph_id, c_str event_id, const vector<bool>& result
 // Timing Measurement
 // ─────────────────────────────────────────────────────────────
 ll compute_and_time(Graph& graph, vector<bool>& results, const unordered_map<ll, ll>& components_map) {
+    cll ev_start = 0, ev_end = eventsList.size() - 1;
+    
     auto start = chrono::high_resolution_clock::now();
-    rec_start_t = chrono::high_resolution_clock::now();
-    MEM_START();
-
-    ll ev_start = 0, ev_end = eventsList.size() - 1;
     compute_2_edge_connectivity(ev_start, ev_end, graph, results, components_map);
-    if (allMeasuremTime) MEM_REPORT();
     auto end = chrono::high_resolution_clock::now();
     return chrono::duration_cast<chrono::milliseconds>(end - start).count();
 }
 
 // ─────────────────────────────────────────────────────────────
-// Duration Printer
-// ─────────────────────────────────────────────────────────────
-void print_all_timers() {
-    Logs_and_Printers::print_duration(time_bridges, "Bridges");
-    Logs_and_Printers::print_duration(time_pruning, "pruning_utils");
-    Logs_and_Printers::print_duration(time_rec, "Recursion Time");
-    cout << "-----------------------------------------------------" << endl;
-    cout << "-----------------------------------------------------" << endl;
-    time_bridges = time_pruning = time_rec = chrono::nanoseconds{0};
-}
-
-// ─────────────────────────────────────────────────────────────
-// Print the answer and Save it
+// Save Answer
 // ─────────────────────────────────────────────────────────────
 void print_and_save(bool isCorrect, ofstream& time_output) {
     auto answer = (isCorrect ? "Correct" : "Wrong") + string(" Output!");
     cout << answer << endl;
-    if (allMeasuremTime) {
-        print_all_timers();
-    } else {
-        cout << "Not measuring sub-routines\n";
-    }
-    
     time_output << answer << endl;
 }
 
